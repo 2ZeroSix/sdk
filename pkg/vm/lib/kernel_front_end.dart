@@ -115,6 +115,9 @@ void declareCompilerOptions(ArgParser args) {
       help:
           'Split resulting kernel file into multiple files (one per package).',
       defaultsTo: false);
+  args.addFlag('track-widget-creation',
+      help: 'Run a kernel transformer to track creation locations for widgets.',
+      defaultsTo: false);
   args.addFlag('gen-bytecode', help: 'Generate bytecode', defaultsTo: false);
   args.addMultiOption('bytecode-options',
       help: 'Specify options for bytecode generation:',
@@ -170,6 +173,7 @@ Future<int> runCompiler(ArgResults options, String usage) async {
   final bool dropAST = options['drop-ast'];
   final bool enableAsserts = options['enable-asserts'];
   final bool nullSafety = options['null-safety'];
+  final bool trackWidgetCreation = options['track-widget-creation'];
   final bool useProtobufTreeShaker = options['protobuf-tree-shaker'];
   final bool splitOutputByPackages = options['split-output-by-packages'];
   final bool minimalKernel = options['minimal-kernel'];
@@ -200,7 +204,10 @@ Future<int> runCompiler(ArgResults options, String usage) async {
     aot: aot,
   )..parseCommandLineFlags(options['bytecode-options']);
 
-  final target = createFrontEndTarget(targetName, nullSafety: nullSafety);
+  final target = createFrontEndTarget(targetName,
+    nullSafety: nullSafety,
+    trackWidgetCreation: trackWidgetCreation,
+  );
   if (target == null) {
     print('Failed to create front-end target $targetName.');
     return badUsageExitCode;
