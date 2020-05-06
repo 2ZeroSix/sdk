@@ -142,8 +142,10 @@ InitializedCompilerState initializeCompiler(
   additionalDills.sort((a, b) => a.toString().compareTo(b.toString()));
 
   if (oldState != null &&
+      oldState.options.target.flags == target.flags &&
       oldState.options.packagesFileUri == packagesFileUri &&
       oldState.options.librariesSpecificationUri == librariesSpecificationUri &&
+      oldState.options.verify == verify &&
       equalLists(oldState.options.additionalDills, additionalDills) &&
       equalMaps(oldState.options.experimentalFlags, experimentalFlags)) {
     return oldState;

@@ -113,10 +113,12 @@ Future<InitializedCompilerState> initializeCompiler(
 
   if (oldState != null &&
       oldState.options.compileSdk == compileSdk &&
+      oldState.options.sdkRoot == sdkRoot &&
       oldState.options.sdkSummary == sdkSummary &&
       oldState.options.packagesFileUri == packagesFile &&
       oldState.options.librariesSpecificationUri == librariesSpecificationUri &&
       equalLists(oldState.options.additionalDills, additionalDills) &&
+      oldState.options.target.flags == target.flags &&
       equalMaps(oldState.options.experimentalFlags, experiments) &&
       equalMaps(oldState.options.environmentDefines, environmentDefines)) {
     // Reuse old state.
