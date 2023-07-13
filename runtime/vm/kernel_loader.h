@@ -213,6 +213,7 @@ class KernelLoader : public ValueObject {
                                        const String& url);
 
   static void FinishLoading(const Class& klass);
+  static void FinishLoading(const Class& klass, Array& patch_classes);
 
   void ReadObfuscationProhibitions();
   void ReadLoadingUnits();
@@ -236,6 +237,10 @@ class KernelLoader : public ValueObject {
 
   KernelLoader(const Script& script,
                const ExternalTypedData& kernel_data,
+               intptr_t data_program_offset);
+  KernelLoader(const Script& script,
+               const ExternalTypedData& kernel_data,
+               Array& patch_classes,
                intptr_t data_program_offset);
 
   void InitializeFields(

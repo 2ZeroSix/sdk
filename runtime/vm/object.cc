@@ -4720,7 +4720,7 @@ void Class::EnsureDeclarationLoaded() const {
 }
 
 // Ensure that top level parsing of the class has been done.
-ErrorPtr Class::EnsureIsFinalized(Thread* thread) const {
+ErrorPtr Class::EnsureIsFinalized(Thread* thread, Array& patch_classes) const {
   ASSERT(!IsNull());
   if (is_finalized()) {
     return Error::null();
@@ -4736,7 +4736,7 @@ ErrorPtr Class::EnsureIsFinalized(Thread* thread) const {
   LeaveCompilerScope ncs(thread);
   ASSERT(thread != NULL);
   const Error& error =
-      Error::Handle(thread->zone(), ClassFinalizer::LoadClassMembers(*this));
+      Error::Handle(thread->zone(), ClassFinalizer::LoadClassMembers(*this, patch_classes));
   if (!error.IsNull()) {
     ASSERT(thread == Thread::Current());
     if (thread->long_jump_base() != NULL) {
@@ -4746,6 +4746,11 @@ ErrorPtr Class::EnsureIsFinalized(Thread* thread) const {
   }
   return error.ptr();
 #endif  // defined(DART_PRECOMPILED_RUNTIME)
+}
+
+ErrorPtr Class::EnsureIsFinalized(Thread* thread) const {
+  ASSERT(thread != NULL);
+  return EnsureIsFinalized(thread, Array::ZoneHandle(thread->zone()));
 }
 
 // Ensure that code outdated by finalized class is cleaned up, new instance of
@@ -14921,9 +14926,10 @@ ErrorPtr Library::FinalizeAllClasses() {
       return ApiError::New(msg);
     }
     ClassDictionaryIterator it(lib, ClassDictionaryIterator::kIteratePrivate);
+    Array& patch_classes_ = Array::ZoneHandle(zone);
     while (it.HasNext()) {
       cls = it.GetNextClass();
-      error = cls.EnsureIsFinalized(thread);
+      error = cls.EnsureIsFinalized(thread, patch_classes_);
       if (!error.IsNull()) {
         return error.ptr();
       }

@@ -39,7 +39,7 @@ static const BootstrapLibProps bootstrap_libraries[] = {
 #undef MAKE_PROPERTIES
 
 static const intptr_t kBootstrapLibraryCount = ARRAY_SIZE(bootstrap_libraries);
-static void Finish(Thread* thread) {
+static void Finish(Thread* thread, Array& patch_classes) {
   Bootstrap::SetupNativeResolver();
   if (!ClassFinalizer::ProcessPendingClasses()) {
     FATAL("Error in class finalization during bootstrapping.");
@@ -51,7 +51,7 @@ static void Finish(Thread* thread) {
   ObjectStore* object_store = thread->isolate_group()->object_store();
   Zone* zone = thread->zone();
   Class& cls = Class::Handle(zone, object_store->closure_class());
-  cls.EnsureIsFinalized(thread);
+  cls.EnsureIsFinalized(thread, patch_classes);
 
   // Make sure _Closure fields are not marked as unboxed as they are accessed
   // with plain loads.
@@ -89,21 +89,21 @@ static void Finish(Thread* thread) {
   // Eagerly compile to avoid repeated checks when loading constants or
   // serializing.
   cls = object_store->null_class();
-  cls.EnsureIsFinalized(thread);
+  cls.EnsureIsFinalized(thread, patch_classes);
   cls = object_store->bool_class();
-  cls.EnsureIsFinalized(thread);
+  cls.EnsureIsFinalized(thread, patch_classes);
   cls = object_store->array_class();
-  cls.EnsureIsFinalized(thread);
+  cls.EnsureIsFinalized(thread, patch_classes);
   cls = object_store->immutable_array_class();
-  cls.EnsureIsFinalized(thread);
+  cls.EnsureIsFinalized(thread, patch_classes);
   cls = object_store->map_impl_class();
-  cls.EnsureIsFinalized(thread);
+  cls.EnsureIsFinalized(thread, patch_classes);
   cls = object_store->const_map_impl_class();
-  cls.EnsureIsFinalized(thread);
+  cls.EnsureIsFinalized(thread, patch_classes);
   cls = object_store->set_impl_class();
-  cls.EnsureIsFinalized(thread);
+  cls.EnsureIsFinalized(thread, patch_classes);
   cls = object_store->const_set_impl_class();
-  cls.EnsureIsFinalized(thread);
+  cls.EnsureIsFinalized(thread, patch_classes);
 }
 
 static ErrorPtr BootstrapFromKernel(Thread* thread,
@@ -141,7 +141,8 @@ static ErrorPtr BootstrapFromKernel(Thread* thread,
     }
 
     // Finish bootstrapping, including class finalization.
-    Finish(thread);
+    Array& patch_classes = Array::Handle(zone);
+    Finish(thread, patch_classes);
 
     isolate_group->object_store()->InitKnownObjects();
 

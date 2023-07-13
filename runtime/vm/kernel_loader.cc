@@ -454,12 +454,13 @@ void KernelLoader::InitializeFields(UriToSourceTable* uri_to_source_table) {
 
 KernelLoader::KernelLoader(const Script& script,
                            const ExternalTypedData& kernel_data,
+                           Array& patch_classes,
                            intptr_t data_program_offset)
     : program_(NULL),
       thread_(Thread::Current()),
       zone_(thread_->zone()),
       no_active_isolate_scope_(),
-      patch_classes_(Array::ZoneHandle(zone_)),
+      patch_classes_(patch_classes),
       library_kernel_offset_(data_program_offset),
       correction_offset_(0),
       loading_native_wrappers_library_(false),
@@ -487,6 +488,12 @@ KernelLoader::KernelLoader(const Script& script,
   library_kernel_data_ = kernel_data.ptr();
   H.InitFromKernelProgramInfo(kernel_program_info_);
 }
+
+KernelLoader::KernelLoader(const Script& script,
+                           const ExternalTypedData& kernel_data,
+                           intptr_t data_program_offset)
+    : KernelLoader(script, kernel_data, Array::ZoneHandle(Thread::Current()->zone()), data_program_offset) {
+    }
 
 void KernelLoader::EvaluateDelayedPragmas() {
   potential_pragma_functions_ =
@@ -1756,7 +1763,7 @@ void KernelLoader::FinishClassLoading(const Class& klass,
   klass.set_is_loaded(true);
 }
 
-void KernelLoader::FinishLoading(const Class& klass) {
+void KernelLoader::FinishLoading(const Class& klass, Array& patch_classes) {
   ASSERT(klass.IsTopLevel() || (klass.kernel_offset() > 0));
 
   Zone* zone = Thread::Current()->zone();
@@ -1770,7 +1777,7 @@ void KernelLoader::FinishLoading(const Class& klass) {
   ASSERT(library_kernel_offset > 0);
 
   KernelLoader kernel_loader(script, library_kernel_data,
-                             library_kernel_offset);
+                             patch_classes, library_kernel_offset);
   LibraryIndex library_index(library_kernel_data);
 
   if (klass.IsTopLevel()) {
@@ -1794,7 +1801,9 @@ void KernelLoader::FinishLoading(const Class& klass) {
   kernel_loader.FinishClassLoading(klass, library, toplevel_class, class_offset,
                                    class_index, &class_helper);
 }
-
+void KernelLoader::FinishLoading(const Class& klass) {
+  FinishLoading(klass, Array::ZoneHandle(Thread::Current()->zone()));
+}
 // Read annotations on a procedure to identify potential VM-specific directives.
 //
 // Output parameters:
@@ -2080,6 +2089,9 @@ const Object& KernelLoader::ClassForScriptAt(const Class& klass,
     if (patch_classes_.IsNull()) {
       const Array& scripts = Array::Handle(Z, kernel_program_info_.scripts());
       ASSERT(!scripts.IsNull());
+      static intptr_t number = 0;
+      OS::PrintErr("Created patch classes for scripts %" Pd " time.\n", ++number);
+      OS::PrintErr("scripts length %" Pd ".\n", scripts.Length());
       patch_classes_ = Array::New(scripts.Length(), Heap::kOld);
     }
 

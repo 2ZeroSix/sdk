@@ -62,7 +62,7 @@ class ClassFinalizer : public AllStatic {
   // Ensures members of the class are loaded, class layout is finalized and size
   // registered in class table.
   static void FinalizeClass(const Class& cls);
-
+  static void FinalizeClass(const Class& cls, Array& patch_classes_);
 #if !defined(DART_PRECOMPILED_RUNTIME)
   // Makes class instantiatable and usable by generated code.
   static ErrorPtr AllocateFinalizeClass(const Class& cls);
@@ -72,6 +72,7 @@ class ClassFinalizer : public AllStatic {
   //
   // Returns Error::null() if there is no loading error.
   static ErrorPtr LoadClassMembers(const Class& cls);
+  static ErrorPtr LoadClassMembers(const Class& cls, Array& patch_classes_);
 
   // Verify that the classes have been properly prefinalized. This is
   // needed during bootstrapping where the classes have been preloaded.

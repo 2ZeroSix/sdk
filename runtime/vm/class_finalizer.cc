@@ -1170,7 +1170,7 @@ void ClassFinalizer::RegisterClassInHierarchy(Zone* zone, const Class& cls) {
 }
 #endif  // defined(DART_PRECOMPILED_RUNTIME)
 
-void ClassFinalizer::FinalizeClass(const Class& cls) {
+void ClassFinalizer::FinalizeClass(const Class& cls, Array& patch_classes_) {
   ASSERT(cls.is_type_finalized());
   if (cls.is_finalized()) {
     return;
@@ -1198,7 +1198,7 @@ void ClassFinalizer::FinalizeClass(const Class& cls) {
   // If loading from a kernel, make sure that the class is fully loaded.
   ASSERT(cls.IsTopLevel() || (cls.kernel_offset() > 0));
   if (!cls.is_loaded()) {
-    kernel::KernelLoader::FinishLoading(cls);
+    kernel::KernelLoader::FinishLoading(cls, patch_classes_);
     if (cls.is_finalized()) {
       return;
     }
@@ -1207,7 +1207,7 @@ void ClassFinalizer::FinalizeClass(const Class& cls) {
   // Ensure super class is finalized.
   const Class& super = Class::Handle(cls.SuperClass());
   if (!super.IsNull()) {
-    FinalizeClass(super);
+    FinalizeClass(super, patch_classes_);
     if (cls.is_finalized()) {
       return;
     }
@@ -1231,7 +1231,9 @@ void ClassFinalizer::FinalizeClass(const Class& cls) {
   }
 #endif  // defined(DART_PRECOMPILED_RUNTIME)
 }
-
+void ClassFinalizer::FinalizeClass(const Class& cls) {
+  FinalizeClass(cls, Array::ZoneHandle(Thread::Current()->zone()));
+}
 #if !defined(DART_PRECOMPILED_RUNTIME)
 
 ErrorPtr ClassFinalizer::AllocateFinalizeClass(const Class& cls) {
@@ -1285,7 +1287,7 @@ ErrorPtr ClassFinalizer::AllocateFinalizeClass(const Class& cls) {
   return Error::null();
 }
 
-ErrorPtr ClassFinalizer::LoadClassMembers(const Class& cls) {
+ErrorPtr ClassFinalizer::LoadClassMembers(const Class& cls, Array& patch_classes_) {
   ASSERT(IsolateGroup::Current()->program_lock()->IsCurrentThreadWriter());
   ASSERT(!cls.is_finalized());
 
@@ -1295,11 +1297,15 @@ ErrorPtr ClassFinalizer::LoadClassMembers(const Class& cls) {
     cls.EnsureDeclarationLoaded();
 #endif
     ASSERT(cls.is_type_finalized());
-    ClassFinalizer::FinalizeClass(cls);
+    ClassFinalizer::FinalizeClass(cls, patch_classes_);
     return Error::null();
   } else {
     return Thread::Current()->StealStickyError();
   }
+}
+
+ErrorPtr ClassFinalizer::LoadClassMembers(const Class& cls) {
+  return LoadClassMembers(cls, Array::ZoneHandle(Thread::Current()->zone()));
 }
 
 // Eagerly allocate instances for enumeration values by evaluating

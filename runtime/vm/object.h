@@ -1729,6 +1729,7 @@ class Class : public Object {
   void EnsureDeclarationLoaded() const;
 
   ErrorPtr EnsureIsFinalized(Thread* thread) const;
+  ErrorPtr EnsureIsFinalized(Thread* thread, Array& patch_classes_) const;
   ErrorPtr EnsureIsAllocateFinalized(Thread* thread) const;
 
   // Allocate a class used for VM internal objects.
