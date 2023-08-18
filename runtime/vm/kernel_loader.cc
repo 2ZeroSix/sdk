@@ -2089,9 +2089,9 @@ const Object& KernelLoader::ClassForScriptAt(const Class& klass,
     if (patch_classes_.IsNull()) {
       const Array& scripts = Array::Handle(Z, kernel_program_info_.scripts());
       ASSERT(!scripts.IsNull());
-      static intptr_t number = 0;
-      OS::PrintErr("Created patch classes for scripts %" Pd " time.\n", ++number);
-      OS::PrintErr("scripts length %" Pd ".\n", scripts.Length());
+      // static intptr_t number = 0;
+      // OS::PrintErr("Created patch classes for scripts %" Pd " time.\n", ++number);
+      // OS::PrintErr("scripts length %" Pd ".\n", scripts.Length());
       patch_classes_ = Array::New(scripts.Length(), Heap::kOld);
     }
 

@@ -101,14 +101,14 @@ uword Heap::AllocateOld(Thread* thread, intptr_t size, Page::PageType type) {
     if (addr != 0) {
       return addr;
     }
-    OS::PrintErr("new CurrentUsage used %" Pd " bytes.\n",
-      new_space_.GetCurrentUsage().used_in_words << kWordSizeLog2);
-    OS::PrintErr("new CurrentUsage capaicty %" Pd " bytes.\n",
-      new_space_.GetCurrentUsage().capacity_in_words << kWordSizeLog2);
-    OS::PrintErr("CurrentUsage used %" Pd " bytes.\n",
-      old_space_.GetCurrentUsage().used_in_words << kWordSizeLog2);
-    OS::PrintErr("CurrentUsage capaicty %" Pd " bytes.\n",
-      old_space_.GetCurrentUsage().capacity_in_words << kWordSizeLog2);
+    // OS::PrintErr("new CurrentUsage used %" Pd " bytes.\n",
+    //   new_space_.GetCurrentUsage().used_in_words << kWordSizeLog2);
+    // OS::PrintErr("new CurrentUsage capaicty %" Pd " bytes.\n",
+    //   new_space_.GetCurrentUsage().capacity_in_words << kWordSizeLog2);
+    // OS::PrintErr("CurrentUsage used %" Pd " bytes.\n",
+    //   old_space_.GetCurrentUsage().used_in_words << kWordSizeLog2);
+    // OS::PrintErr("CurrentUsage capaicty %" Pd " bytes.\n",
+    //   old_space_.GetCurrentUsage().capacity_in_words << kWordSizeLog2);
 
 
     // Wait for any GC tasks that are in progress.
