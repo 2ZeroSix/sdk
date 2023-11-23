@@ -2466,6 +2466,9 @@ bool FlowGraphInliner::FunctionHasPreferInlinePragma(const Function& function) {
 }
 
 bool FlowGraphInliner::FunctionHasNeverInlinePragma(const Function& function) {
+  if (!CompilerState::Current().is_aot()) {
+    return true;
+  }
   if (!function.has_pragma()) {
     return false;
   }
