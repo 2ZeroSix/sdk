@@ -318,7 +318,10 @@ const Slot& Slot::GetCanonicalSlot(Thread* thread,
 
 FieldGuardState::FieldGuardState(const Field& field)
     : state_(GuardedCidBits::encode(field.guarded_cid()) |
-             IsNullableBit::encode(field.is_nullable())) {}
+             IsNullableBit::encode(field.is_nullable())) {
+  ASSERT(compiler::target::UntaggedObject::kClassIdTagSize <=
+         GuardedCidBits::bitsize());
+}
 
 Representation Slot::UnboxedRepresentation() const {
   switch (field_guard_state().guarded_cid()) {
