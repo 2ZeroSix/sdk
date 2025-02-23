@@ -1129,6 +1129,9 @@ void KernelLoader::FinishTopLevelClassLoading(
 
 void KernelLoader::LoadLibraryImportsAndExports(Library* library,
                                                 const Class& toplevel_class) {
+  OS::PrintErr("LoadLibraryImportsAndExports\n");
+  library->Print();
+  toplevel_class.Print();
   GrowableObjectArray& show_list = GrowableObjectArray::Handle(Z);
   GrowableObjectArray& hide_list = GrowableObjectArray::Handle(Z);
   Array& show_names = Array::Handle(Z);
@@ -1138,6 +1141,7 @@ void KernelLoader::LoadLibraryImportsAndExports(Library* library,
 
   const intptr_t deps_count = helper_.ReadListLength();
   const Array& deps = Array::Handle(Array::New(deps_count));
+  OS::PrintErr("deps count %" Pd " time.\n", deps_count);
   for (intptr_t dep = 0; dep < deps_count; ++dep) {
     LibraryDependencyHelper dependency_helper(&helper_);
 
@@ -1897,6 +1901,10 @@ const Object& KernelLoader::ClassForScriptAt(const Class& klass,
     if (patch_classes_.IsNull()) {
       const Array& scripts = Array::Handle(Z, kernel_program_info_.scripts());
       ASSERT(!scripts.IsNull());
+      static intptr_t number = 0;
+      klass.Print();
+      OS::PrintErr("Created patch classes for scripts %" Pd " time.\n", ++number);
+      OS::PrintErr("scripts length %" Pd ".\n", scripts.Length());
       patch_classes_ = Array::New(scripts.Length(), Heap::kOld);
     }
 
