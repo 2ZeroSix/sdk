@@ -186,7 +186,7 @@ OS::PrintErr("old CurrentUsage capaicty %" Pd " bytes.\n",
   OS::PrintErr("Exhausted heap space, trying to allocate %" Pd " bytes.\n",
                size);
   intptr_t* test = 0;
-  OS::PrintErr("%" Pd, *test);
+  *test = 1;
   return 0;
 }
 
