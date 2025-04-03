@@ -1129,19 +1129,13 @@ void KernelLoader::FinishTopLevelClassLoading(
 
 void KernelLoader::LoadLibraryImportsAndExports(Library* library,
                                                 const Class& toplevel_class) {
-  OS::PrintErr("LoadLibraryImportsAndExports\n");
-  library->Print();
-  toplevel_class.Print();
-  GrowableObjectArray& show_list = GrowableObjectArray::Handle(Z);
-  GrowableObjectArray& hide_list = GrowableObjectArray::Handle(Z);
-  Array& show_names = Array::Handle(Z);
-  Array& hide_names = Array::Handle(Z);
-  Namespace& ns = Namespace::Handle(Z);
-  LibraryPrefix& library_prefix = LibraryPrefix::Handle(Z);
 
   const intptr_t deps_count = helper_.ReadListLength();
   const Array& deps = Array::Handle(Array::New(deps_count));
-  OS::PrintErr("deps count %" Pd " time.\n", deps_count);
+  // intptr_t total_show = 0;
+  // intptr_t total_hide = 0;
+
+  // library->Print();
   for (intptr_t dep = 0; dep < deps_count; ++dep) {
     LibraryDependencyHelper dependency_helper(&helper_);
 
@@ -1162,8 +1156,8 @@ void KernelLoader::LoadLibraryImportsAndExports(Library* library,
     }
 
     // Prepare show and hide lists.
-    show_list = GrowableObjectArray::New(Heap::kOld);
-    hide_list = GrowableObjectArray::New(Heap::kOld);
+    GrowableObjectArray& show_list = GrowableObjectArray::Handle(Z);
+    GrowableObjectArray& hide_list = GrowableObjectArray::Handle(Z);
     const intptr_t combinator_count = helper_.ReadListLength();
     for (intptr_t c = 0; c < combinator_count; ++c) {
       uint8_t flags = helper_.ReadFlags();
@@ -1172,13 +1166,21 @@ void KernelLoader::LoadLibraryImportsAndExports(Library* library,
         String& show_hide_name =
             H.DartSymbolObfuscate(helper_.ReadStringReference());
         if ((flags & LibraryDependencyHelper::Show) != 0) {
+          if (show_list.IsNull()) {
+            show_list = GrowableObjectArray::New(Heap::kOld);
+          }
           show_list.Add(show_hide_name, Heap::kOld);
         } else {
+          if (hide_list.IsNull()) {
+            hide_list = GrowableObjectArray::New(Heap::kOld);
+          }
           hide_list.Add(show_hide_name, Heap::kOld);
         }
       }
     }
 
+    Array& show_names = Array::Handle(Z);
+    Array& hide_names = Array::Handle(Z);
     if (show_list.Length() > 0) {
       show_names = Array::MakeFixedLength(show_list);
     } else {
@@ -1208,7 +1210,11 @@ void KernelLoader::LoadLibraryImportsAndExports(Library* library,
           "import of dart:ffi is not supported in the current Dart runtime");
     }
     String& prefix = H.DartSymbolPlain(dependency_helper.name_index_);
-    ns = Namespace::New(target_library, show_names, hide_names, *library);
+    Namespace& ns = Namespace::Handle(Namespace::New(target_library, show_names, hide_names, *library));
+    // target_library.Print();
+    // total_hide += hide_names.Length();
+    // total_show += show_names.Length();
+    LibraryPrefix& library_prefix = LibraryPrefix::Handle(Z);
     if ((dependency_helper.flags_ & LibraryDependencyHelper::Export) != 0) {
       library->AddExport(ns);
     } else {
@@ -1240,6 +1246,17 @@ void KernelLoader::LoadLibraryImportsAndExports(Library* library,
       deps.SetAt(dep, library_prefix);
     }
   }
+
+  // OS::PrintErr("deps_count %" Pd "\n", deps_count);
+  // OS::PrintErr("total_show %" Pd "\n", total_show);
+  // OS::PrintErr("total_hide %" Pd "\n", total_hide);
+  // OS::PrintErr("exports %" Pd "\n", Array::Handle(library->exports()).Length());
+  // String& prefix = H.DartSymbolPlain(dependency_helper.name_index_);
+  // if (prefix.IsNull() || prefix.Length() == 0) {
+    // OS::PrintErr("imports %" Pd "\n", library->num_imports());
+  // } else {
+  //   OS::PrintErr("imports %" Pd "\n", library_prefix.num_imports());
+  // }
 
   library->set_dependencies(deps);
 }
@@ -1901,10 +1918,6 @@ const Object& KernelLoader::ClassForScriptAt(const Class& klass,
     if (patch_classes_.IsNull()) {
       const Array& scripts = Array::Handle(Z, kernel_program_info_.scripts());
       ASSERT(!scripts.IsNull());
-      static intptr_t number = 0;
-      klass.Print();
-      OS::PrintErr("Created patch classes for scripts %" Pd " time.\n", ++number);
-      OS::PrintErr("scripts length %" Pd ".\n", scripts.Length());
       patch_classes_ = Array::New(scripts.Length(), Heap::kOld);
     }
 

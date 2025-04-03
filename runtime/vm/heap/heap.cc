@@ -124,15 +124,6 @@ uword Heap::AllocateOld(Thread* thread, intptr_t size, bool is_exec) {
     if (addr != 0) {
       return addr;
     }
-OS::PrintErr("new CurrentUsage used %" Pd " bytes.\n",
-  new_space_.GetCurrentUsage().used_in_words << kWordSizeLog2);
-OS::PrintErr("new CurrentUsage capaicty %" Pd " bytes.\n",
-  new_space_.GetCurrentUsage().capacity_in_words << kWordSizeLog2);
-OS::PrintErr("old CurrentUsage used %" Pd " bytes.\n",
-  old_space_.GetCurrentUsage().used_in_words << kWordSizeLog2);
-OS::PrintErr("old CurrentUsage capaicty %" Pd " bytes.\n",
-  old_space_.GetCurrentUsage().capacity_in_words << kWordSizeLog2);
-
     // Wait for any GC tasks that are in progress.
     WaitForSweeperTasks(thread);
     addr = old_space_.TryAllocate(size, is_exec);
@@ -185,8 +176,6 @@ OS::PrintErr("old CurrentUsage capaicty %" Pd " bytes.\n",
   // Give up allocating this object.
   OS::PrintErr("Exhausted heap space, trying to allocate %" Pd " bytes.\n",
                size);
-  intptr_t* test = 0;
-  *test = 1;
   return 0;
 }
 
