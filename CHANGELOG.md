@@ -1,8 +1,11 @@
 ## 3.5.4 - 2024-10-17
 
 - Fixes record runtime type's hash code in dart2wasm (issue [#56817]).
+- Fixes miscompilation on ARM32 with large numbers of literals (issue [flutter/flutter#172626])
+
 
 [#56817]: https://github.com/dart-lang/sdk/issues/56817
+[flutter/flutter#172626]: https://github.com/flutter/flutter/issues/172626
 
 ## 3.5.3 - 2024-09-11
 
