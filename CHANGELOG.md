@@ -9,7 +9,9 @@ Released on: 2025-01-30
   [#1630][dart_style #1630]).
 - Fixes an issue where the DevTools analytics did not distinguish
   between new and legacy inspector events (issue [#59884][]).
+- Fixes miscompilation on ARM32 with large numbers of literals (issue [flutter/flutter#172626])
 
+[flutter/flutter#172626]: https://github.com/flutter/flutter/issues/172626
 [#59719]: https://github.com/dart-lang/sdk/issues/59719
 [#59815]: https://github.com/dart-lang/sdk/issues/59815
 [dart_style #1630]: https://github.com/dart-lang/dart_style/issues/1630
