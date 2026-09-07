@@ -1173,6 +1173,8 @@ For example: dart compile $name --packages=/tmp/pkgs.json main.dart''',
     Target.linuxArm64,
     Target.linuxRiscv64,
     Target.linuxX64,
+    Target.macOSArm64,
+    Target.macOSX64,
   };
 
   /// Returns target platform for cross compilation.
