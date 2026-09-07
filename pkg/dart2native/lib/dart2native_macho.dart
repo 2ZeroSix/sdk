@@ -6,6 +6,7 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import './macho.dart';
+import './macho_codesign.dart';
 import 'src/generate_utils.dart';
 
 /// Pipe from one file stream into another.
@@ -138,7 +139,16 @@ Future<void> writeAppendedMachOExecutable(
 
   if (outputHeaders.hasCodeSignature) {
     if (!Platform.isMacOS) {
-      throw UnsupportedError('Cannot sign MachO binary on non-macOS platform');
+      // No `codesign` to run when cross compiling, so produce the ad-hoc
+      // signature ourselves. macOS on arm64 refuses to execute a binary whose
+      // signature does not verify, and appending the snapshot invalidated the
+      // one dartaotruntime shipped with, so this is not optional.
+      //
+      // The macOS path below is left alone: `codesign` can produce a
+      // linker-signed signature, which we cannot, and it is the better-tested
+      // option where it is available.
+      adHocSignMachO(File(outputPath));
+      return;
     }
 
     // After writing the modified file, we perform ad-hoc signing (no identity)
