@@ -457,7 +457,9 @@ class CompileNativeCommand extends CompileSubcommandCommand {
     Target.linuxArm,
     Target.linuxArm64,
     Target.linuxRiscv64,
-    Target.linuxX64
+    Target.linuxX64,
+    Target.macOSArm64,
+    Target.macOSX64,
   };
 
   final String commandName;
