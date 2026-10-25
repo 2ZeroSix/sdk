@@ -243,7 +243,7 @@ class SdkCache {
     if (verbose) {
       _stderr.writeln('Downloading $uri...');
     }
-    final response = await _httpClient.get(uri);
+    final response = await _httpClient.get(uri, headers: _authHeaders(uri));
     if (response.statusCode != io.HttpStatus.ok) {
       throw SdkCacheException('GET $uri failed: ${response.statusCode}');
     }
@@ -266,8 +266,34 @@ class SdkCache {
           required Stage stage,
           required String version,
           required String path}) =>
-      Uri.https('storage.googleapis.com',
-          'dart-archive/channels/${channel.name}/${stage.name}/$version/$path');
+      Uri.parse('${_archiveBaseUrl()}'
+          '/channels/${channel.name}/${stage.name}/$version/$path');
+
+  /// Root of the Dart archive, overridable with DART_ARCHIVE_BASE_URL for
+  /// SDKs built from a fork, whose artifacts are not in the public archive.
+  static String _archiveBaseUrl() {
+    final override = io.Platform.environment['DART_ARCHIVE_BASE_URL'];
+    if (override != null && override.isNotEmpty) {
+      return override.endsWith('/')
+          ? override.substring(0, override.length - 1)
+          : override;
+    }
+    return 'https://storage.googleapis.com/dart-archive';
+  }
+
+  /// The internal bucket requires the same credentials as the Flutter tool.
+  static Map<String, String>? _authHeaders(Uri uri) {
+    final env = io.Platform.environment;
+    final username = env['YA_BUCKET_USERNAME'];
+    final password = env['YA_BUCKET_PASSWORD'];
+    if (uri.host != 'bucket.yandex-team.ru' ||
+        username == null ||
+        password == null) {
+      return null;
+    }
+    final credentials = base64.encode(utf8.encode('$username:$password'));
+    return {'Authorization': 'Basic $credentials'};
+  }
 
   /// Default implementation fdor making a [path] executable.
   ///
